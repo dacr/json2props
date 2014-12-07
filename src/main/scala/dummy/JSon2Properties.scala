@@ -22,7 +22,7 @@ import org.json4s._
 import scala.util.{ Try, Success }
 
 object JSon2Properties {
-  private def convert(key:String, bv: JValue): Map[String, String] = {
+  private def convert(key:String, bv: Any): Map[String, String] = {
     val result = bv match {
       case v: JField     => toProperties(v, key)
       case v: JArray           => v.values.zipWithIndex.flatMap { case (sv, i) => convert(key + "." + i, sv) }
