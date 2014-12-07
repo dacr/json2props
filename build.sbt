@@ -6,7 +6,7 @@ name := "json2props"
 
 version := "0.0"
 
-scalaVersion := "2.11.4"
+scalaVersion := "2.10.4"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation" , "-feature")
 
@@ -14,9 +14,14 @@ mainClass in assembly := Some("dummy.Dummy")
 
 jarName in assembly := "json2props.jar"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.+" % "test"
+libraryDependencies ++= Seq(
+  "org.json4s"        %% "json4s-native" % "3.2.11"
+)
 
-libraryDependencies += "junit" % "junit" % "4.+" % "test"
+libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "2.2.+" % "test",
+  "junit"          % "junit"     % "4.+"   % "test"
+)
 
 initialCommands in console := """import dummy._"""
 

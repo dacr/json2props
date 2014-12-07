@@ -15,28 +15,30 @@
  */
 
 package dummy
-/*
+
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
 
+
+
 @RunWith(classOf[JUnitRunner])
 class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
 
-  test("reactive mongo bson api experiments") {
-    import reactivemongo.bson._
-    val bd = BSONDocument(
-      "test" -> 123,
-      "sub" -> BSONDocument(
-        "x" -> 1,
-        "y" -> 2
-      ),
-      "arr" -> BSONArray(
-          "10",
-          "20"
-          )
-    )
+  test("bson api experiments (mongo bson)") {
+  }
+  
+  test("bson api experiments (json4s)") {
+    import org.json4s.JsonDSL._
+    
+    val bd = 
+      ("test" -> 123) ~ 
+      ("sub" -> 
+          ("x" -> 1) ~ 
+          ("y" -> 2) ) ~
+      ("arr" -> Array("10", "20"))
+
 
     val m = JSon2Properties.toProperties(bd)
     m should have size (5)
@@ -48,4 +50,4 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
   }
 
 }
-*/
+
