@@ -24,22 +24,24 @@ import scala.util.{ Try, Success }
 object JSon2Properties {
   private def convert(key:String, bv: Any): Map[String, String] = {
     val result = bv match {
-      case v: JField     => toProperties(v, key)
-      case v: JArray           => v.values.zipWithIndex.flatMap { case (sv, i) => convert(key + "." + i, sv) }
-      case v: JBool            => Map(key -> v.values.toString)
-      case v: JDouble          => Map(key -> v.values.toString)
-      case v: JInt             => Map(key -> v.values.toString)
-      case v: BSONLong         => Map(key -> v.value.toString)
+      case v: Tuple2[String,JValue] => toProperties(v._2, v._1)
       case v: JString          => Map(key -> v.values)
-      case v: BSONDateTime     => Map(key -> v.value.toString)
-      case v: BSONTimestamp    => Map(key -> v.value.toString)
-      case v: BSONSymbol       => Map(key -> v.value.toString)
-      case v: BSONBinary       => Map() // TODO : NotYetImplemented, so ignored
-      case v: BSONDBPointer    => Map() // TODO : NotYetImplemented, so ignored
-      case v: BSONJavaScript   => Map() // TODO : NotYetImplemented, so ignored
-      case v: BSONJavaScriptWS => Map() // TODO : NotYetImplemented, so ignored
-      case v: BSONObjectID     => Map() // TODO : NotYetImplemented, so ignored
-      case v: BSONRegex        => Map() // TODO : NotYetImplemented, so ignored
+      case v: JDouble          => Map(key -> v.values.toString)
+      case v: JDecimal         => Map(key -> v.values.toString)
+      case v: JInt             => Map(key -> v.values.toString)
+      case v: JBool            => Map(key -> v.values.toString)
+      case v: JObject          => v.values.flatMap { case (subk,sv) => convert(key+"."+subk, sv)}
+      case v: JArray           => v.values.zipWithIndex.flatMap { case (sv, i) => convert(key + "." + i, sv) }
+//      case v: BSONLong         => Map(key -> v.value.toString)
+//      case v: BSONDateTime     => Map(key -> v.value.toString)
+//      case v: BSONTimestamp    => Map(key -> v.value.toString)
+//      case v: BSONSymbol       => Map(key -> v.value.toString)
+//      case v: BSONBinary       => Map() // TODO : NotYetImplemented, so ignored
+//      case v: BSONDBPointer    => Map() // TODO : NotYetImplemented, so ignored
+//      case v: BSONJavaScript   => Map() // TODO : NotYetImplemented, so ignored
+//      case v: BSONJavaScriptWS => Map() // TODO : NotYetImplemented, so ignored
+//      case v: BSONObjectID     => Map() // TODO : NotYetImplemented, so ignored
+//      case v: BSONRegex        => Map() // TODO : NotYetImplemented, so ignored
       case v => Map() // TODO : temporary to avoid any other unsupported types
       //        case v:BSONMaxKey =>       key -> ???
       //        case v:BSONMinKey =>       key -> ???
@@ -49,12 +51,8 @@ object JSon2Properties {
     result.toMap
   }
   
-  def toProperties(bd: BSONDocument, base: String = ""): Map[String, String] = {
-    val result = bd.stream.collect { case Success(x) => x }.flatMap {
-      case (curkey, value) =>
-        val key = if (base.size==0) curkey else base+"."+curkey
-        convert(key, value)
-    }
+  def toProperties(bd: JValue, base: String = ""): Map[String, String] = {
+    val result = convert(base, bd)
     result.toMap
   }
   

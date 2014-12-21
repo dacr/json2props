@@ -33,11 +33,9 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
     import org.json4s.JsonDSL._
     
     val bd = 
-      ("test" -> 123) ~ 
-      ("sub" -> 
-          ("x" -> 1) ~ 
-          ("y" -> 2) ) ~
-      ("arr" -> Array("10", "20"))
+      ("test" -> 123) ~
+      ("sub" -> ("x" -> 1) ~ ("y" -> 2) ) ~
+      ("arr" -> List("10", "20") )
 
 
     val m = JSon2Properties.toProperties(bd)
