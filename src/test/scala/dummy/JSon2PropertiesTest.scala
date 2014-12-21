@@ -26,10 +26,20 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
 
-  test("bson api experiments (mongo bson)") {
+  test("basic") {
+    import org.json4s._
+    import org.json4s.native.JsonMethods._
+    
+    val json1 = parse(""" { "x":32,  "n" : [1, 2, 3, 4] } """)  
+    val m = JSon2Properties.toProperties(json1)
+    m should have size (5)
+    m should contain("x" -> 32)
+    m should contain("n.1" -> 2)
   }
   
-  test("bson api experiments (json4s)") {
+  
+  
+  test("test with DSL") {
     import org.json4s.JsonDSL._
     
     val bd = 
@@ -37,12 +47,11 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
       ("sub" -> ("x" -> 1) ~ ("y" -> 2) ) ~
       ("arr" -> List("10", "20") )
 
-
     val m = JSon2Properties.toProperties(bd)
     m should have size (5)
-    m should contain("test" -> "123")
-    m should contain("sub.x" -> "1")
-    m should contain("sub.y" -> "2")
+    m should contain("test" -> 123)
+    m should contain("sub.x" -> 1)
+    m should contain("sub.y" -> 2)
     m should contain("arr.0" -> "10")
     m should contain("arr.1" -> "20")
   }

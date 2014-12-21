@@ -16,46 +16,40 @@
 
 package dummy
 
-
 import org.json4s.JsonDSL._
 import org.json4s._
 import scala.util.{ Try, Success }
 
 object JSon2Properties {
-  private def convert(key:String, bv: Any): Map[String, String] = {
+  private def mkkey(key: String, subkey: Any): String =
+    if (key.size > 0) key + "." + subkey else subkey.toString
+
+  private def convert(key: String, bv: Any): Map[String, Any] = {
     val result = bv match {
-      case v: Tuple2[String,JValue] => toProperties(v._2, v._1)
-      case v: JString          => Map(key -> v.values)
-      case v: JDouble          => Map(key -> v.values.toString)
-      case v: JDecimal         => Map(key -> v.values.toString)
-      case v: JInt             => Map(key -> v.values.toString)
-      case v: JBool            => Map(key -> v.values.toString)
-      case v: JObject          => v.values.flatMap { case (subk,sv) => convert(key+"."+subk, sv)}
-      case v: JArray           => v.values.zipWithIndex.flatMap { case (sv, i) => convert(key + "." + i, sv) }
-//      case v: BSONLong         => Map(key -> v.value.toString)
-//      case v: BSONDateTime     => Map(key -> v.value.toString)
-//      case v: BSONTimestamp    => Map(key -> v.value.toString)
-//      case v: BSONSymbol       => Map(key -> v.value.toString)
-//      case v: BSONBinary       => Map() // TODO : NotYetImplemented, so ignored
-//      case v: BSONDBPointer    => Map() // TODO : NotYetImplemented, so ignored
-//      case v: BSONJavaScript   => Map() // TODO : NotYetImplemented, so ignored
-//      case v: BSONJavaScriptWS => Map() // TODO : NotYetImplemented, so ignored
-//      case v: BSONObjectID     => Map() // TODO : NotYetImplemented, so ignored
-//      case v: BSONRegex        => Map() // TODO : NotYetImplemented, so ignored
-      case v => Map() // TODO : temporary to avoid any other unsupported types
-      //        case v:BSONMaxKey =>       key -> ???
-      //        case v:BSONMinKey =>       key -> ???
-      //        case v:BSONNull =>         key -> ???
-      //        case v:BSONUndefined =>    key -> ???
+      case v: Tuple2[String, _] => toProperties(v._2, v._1)
+      case v: JString           => Map(key -> v.values)
+      case v: JDouble           => Map(key -> v.values)
+      case v: JDecimal          => Map(key -> v.values)
+      case v: JInt              => Map(key -> v.values)
+      case v: JBool             => Map(key -> v.values)
+      case v: JObject           => v.values.flatMap { case (subk, sv) => convert(mkkey(key, subk), sv) }
+      case v: JArray            => v.values.zipWithIndex.flatMap { case (sv, i) => convert(mkkey(key, i), sv) }
+      case v: Iterable[_] => v.zipWithIndex.flatMap {
+        case ((subk, sv), _) => convert(mkkey(key, subk), sv)  // for map for example
+        case (sv, i) => convert(mkkey(key,i), sv)
+      }
+      case JNull    => Map(key -> "")
+      case JNothing => Map(key -> "")
+      case v        => Map(key -> v)
     }
     result.toMap
   }
-  
-  def toProperties(bd: JValue, base: String = ""): Map[String, String] = {
+
+  def toProperties(bd: Any, base: String = ""): Map[String, Any] = {
     val result = convert(base, bd)
     result.toMap
   }
-  
+
 }
 
 
