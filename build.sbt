@@ -18,7 +18,7 @@ libraryDependencies ++= Seq(
 
 initialCommands in console := """
 import fr.janalyse.json._
-import JSon2Properties
+import JSon2Properties._
 """
 
 publishTo := Some(
