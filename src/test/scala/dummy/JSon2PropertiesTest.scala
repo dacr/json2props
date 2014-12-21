@@ -28,7 +28,34 @@ import org.json4s.JsonDSL._
 @RunWith(classOf[JUnitRunner])
 class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
 
+
+  test("basic 0") {
+    val m = JSon2Properties.toProperties(parse(""))
+    m should have size(0)
+  }
+
   test("basic 1") {
+    val m = JSon2Properties.toProperties(parse("{}"))
+    m should have size(0)
+  }
+
+  test("basic 2") {
+    val m = JSon2Properties.toProperties(parse("""{"a" : 0}"""))
+    m should have size(1)
+    m should contain("a"-> 0)
+  }
+
+  
+  test("basic 3") {
+    val json = parse("""{"a" : null }""")
+    info(json.toString)
+    val m = JSon2Properties.toProperties(json)
+    m should have size(1)
+    m should contain("a"-> None)
+  }
+
+  
+  test("basic 4") {
     val json = parse("""{"name":"Toy","price":35.35}""")
     val m = JSon2Properties.toProperties(json)
     m should have size (2)
@@ -36,7 +63,7 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
     m should contain("price" -> 35.35d)
   }
 
-  test("basic 2") {
+  test("basic 5") {
     val json = parse(""" { "x":32,  "n" : [1, 2, 3, 4] } """)
     val m = JSon2Properties.toProperties(json)
     m should have size (5)
@@ -44,13 +71,46 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
     m should contain("n.1" -> 2)
   }
 
-  test("basic 3") {
+  test("basic 6") {
     val json = parse(""" { "a": {"b" : {"c": { "d" : 123 } } }  } """)
     val m = JSon2Properties.toProperties(json)
     m should have size (1)
     m should contain("a.b.c.d" -> 123)
   }
 
+  test("basic 7") {
+    val m = JSon2Properties.toProperties(parse("""{"a" : true}"""))
+    m should have size(1)
+    m should contain("a"-> true)
+  }
+  
+  test("basic 8") {
+    val m = JSon2Properties.toProperties(parse("""{"a" : true, "b": false}"""))
+    m should have size(2)
+    m should contain("a"-> true)
+    m should contain("b"-> false)
+  }
+  
+  test("basic 9") {
+    val m = JSon2Properties.toProperties(parse("""[]"""))
+    m should have size(0)
+  }
+
+  test("basic 10") {
+    val m = JSon2Properties.toProperties(parse("""[100,200,300]"""))
+    info(m.toString)
+    m should have size(3)
+    m should contain("0" -> 100)
+  }
+
+  test("basic 11") {
+    val m = JSon2Properties.toProperties(parse("""[{"a":200}]"""))
+    info(m.toString)
+    m should have size(1)
+    m should contain("0.a" -> 200)
+  }
+
+  
   
   test("test with DSL") {
     val bd =

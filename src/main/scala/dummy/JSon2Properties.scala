@@ -19,36 +19,37 @@ package dummy
 import org.json4s.JsonDSL._
 import org.json4s._
 import scala.util.{ Try, Success }
+import annotation.tailrec
 
 object JSon2Properties {
   private def mkkey(key: String, subkey: Any): String =
     if (key.size > 0) key + "." + subkey else subkey.toString
 
-  private def convert(key: String, bv: Any): Map[String, Any] = {
-    val result = bv match {
-      case v: Tuple2[String, _] => toProperties(v._2, v._1)
+  // TODO : must but @tailrec
+  private def convert(bv: Any, key: String): Map[String, Any] = {
+    bv match {
+      case null                 => Map(key-> None) // TODO : bof
+      case v: Tuple2[String, _] => convert(v._2, v._1)
       case v: JString           => Map(key -> v.values)
       case v: JDouble           => Map(key -> v.values)
       case v: JDecimal          => Map(key -> v.values)
       case v: JInt              => Map(key -> v.values)
       case v: JBool             => Map(key -> v.values)
-      case v: JObject           => v.values.flatMap { case (subk, sv) => convert(mkkey(key, subk), sv) }
-      case v: JArray            => v.values.zipWithIndex.flatMap { case (sv, i) => convert(mkkey(key, i), sv) }
-      case v: Iterable[_] => v.zipWithIndex.flatMap {
-        case ((subk, sv), _) => convert(mkkey(key, subk), sv)  // for map for example
-        case (sv, i) => convert(mkkey(key,i), sv)
-      }
-      case JNull    => Map(key -> "")
-      case JNothing => Map(key -> "")
-      case v        => Map(key -> v)
+      case JNull                => Map.empty
+      case JNothing             => Map.empty
+      case v: JObject           => v.values.flatMap { case (subk, sv) => convert(sv, mkkey(key, subk)) }.toMap
+      case v: JArray            => v.values.zipWithIndex.flatMap { case (sv, i) => convert(sv, mkkey(key, i)) }.toMap
+      case v: Iterable[_] =>
+        val r = v.zipWithIndex.flatMap {
+          case ((subk, sv), _) => convert(sv, mkkey(key, subk)) // map for example
+          case (sv, i)         => convert(sv, mkkey(key, i))
+        }
+        r.toMap
+      case v    => Map(key -> v)
     }
-    result.toMap
   }
 
-  def toProperties(bd: Any, base: String = ""): Map[String, Any] = {
-    val result = convert(base, bd)
-    result.toMap
-  }
+  def toProperties(bd: Any, base: String = ""): Map[String, Any] = convert(bd, base)
 
 }
 
