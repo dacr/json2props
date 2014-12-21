@@ -1,41 +1,30 @@
-import AssemblyKeys._
-
-seq(assemblySettings: _*)
-
 name := "json2props"
 
-version := "0.0"
+version := "0.1"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.4"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation" , "-feature")
 
-mainClass in assembly := Some("dummy.Dummy")
-
-jarName in assembly := "json2props.jar"
+crossScalaVersions := Seq("2.10.4", "2.11.4")
 
 libraryDependencies ++= Seq(
   "org.json4s"        %% "json4s-native" % "3.2.11"
 )
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "2.2.+" % "test",
-  "junit"          % "junit"     % "4.+"   % "test"
+  "org.scalatest" %% "scalatest" % "2.1.+" % "test"
 )
 
-initialCommands in console := """import dummy._"""
+initialCommands in console := """
+import fr.janalyse.json._
+import JSon2Properties
+"""
 
-sourceGenerators in Compile <+= 
- (sourceManaged in Compile, version, name, jarName in assembly) map {
-  (dir, version, projectname, jarexe) =>
-  val file = dir / "dummy" / "MetaInfo.scala"
-  IO.write(file,
-  """package dummy
-    |object MetaInfo { 
-    |  val version="%s"
-    |  val project="%s"
-    |  val jarbasename="%s"
-    |}
-    |""".stripMargin.format(version, projectname, jarexe.split("[.]").head) )
-  Seq(file)
-}
+publishTo := Some(
+     Resolver.sftp(
+         "JAnalyse Repository",
+         "www.janalyse.fr",
+         "/home/tomcat/webapps-janalyse/repository"
+     ) as("tomcat", new File(util.Properties.userHome+"/.ssh/id_rsa"))
+)

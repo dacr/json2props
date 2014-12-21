@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dummy
+package fr.janalyse.json
 
 import org.json4s.JsonDSL._
 import org.json4s._
@@ -49,7 +49,7 @@ object JSon2Properties {
     }
   }
 
-  def toProperties(bd: Any, base: String = ""): Map[String, Any] = convert(bd, base)
+  def flattenJSon(bd: Any, base: String = ""): Map[String, Any] = convert(bd, base)
 
 }
 

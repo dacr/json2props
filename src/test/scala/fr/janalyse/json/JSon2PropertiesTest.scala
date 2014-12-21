@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package dummy
+package fr.janalyse.json
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -25,22 +24,21 @@ import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.JsonDSL._
 
-@RunWith(classOf[JUnitRunner])
 class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
 
 
   test("basic 0") {
-    val m = JSon2Properties.toProperties(parse(""))
+    val m = JSon2Properties.flattenJSon(parse(""))
     m should have size(0)
   }
 
   test("basic 1") {
-    val m = JSon2Properties.toProperties(parse("{}"))
+    val m = JSon2Properties.flattenJSon(parse("{}"))
     m should have size(0)
   }
 
   test("basic 2") {
-    val m = JSon2Properties.toProperties(parse("""{"a" : 0}"""))
+    val m = JSon2Properties.flattenJSon(parse("""{"a" : 0}"""))
     m should have size(1)
     m should contain("a"-> 0)
   }
@@ -49,7 +47,7 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
   test("basic 3") {
     val json = parse("""{"a" : null }""")
     info(json.toString)
-    val m = JSon2Properties.toProperties(json)
+    val m = JSon2Properties.flattenJSon(json)
     m should have size(1)
     m should contain("a"-> None)
   }
@@ -57,7 +55,7 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
   
   test("basic 4") {
     val json = parse("""{"name":"Toy","price":35.35}""")
-    val m = JSon2Properties.toProperties(json)
+    val m = JSon2Properties.flattenJSon(json)
     m should have size (2)
     m should contain("name" -> "Toy")
     m should contain("price" -> 35.35d)
@@ -65,7 +63,7 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
 
   test("basic 5") {
     val json = parse(""" { "x":32,  "n" : [1, 2, 3, 4] } """)
-    val m = JSon2Properties.toProperties(json)
+    val m = JSon2Properties.flattenJSon(json)
     m should have size (5)
     m should contain("x" -> 32)
     m should contain("n.1" -> 2)
@@ -73,38 +71,38 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
 
   test("basic 6") {
     val json = parse(""" { "a": {"b" : {"c": { "d" : 123 } } }  } """)
-    val m = JSon2Properties.toProperties(json)
+    val m = JSon2Properties.flattenJSon(json)
     m should have size (1)
     m should contain("a.b.c.d" -> 123)
   }
 
   test("basic 7") {
-    val m = JSon2Properties.toProperties(parse("""{"a" : true}"""))
+    val m = JSon2Properties.flattenJSon(parse("""{"a" : true}"""))
     m should have size(1)
     m should contain("a"-> true)
   }
   
   test("basic 8") {
-    val m = JSon2Properties.toProperties(parse("""{"a" : true, "b": false}"""))
+    val m = JSon2Properties.flattenJSon(parse("""{"a" : true, "b": false}"""))
     m should have size(2)
     m should contain("a"-> true)
     m should contain("b"-> false)
   }
   
   test("basic 9") {
-    val m = JSon2Properties.toProperties(parse("""[]"""))
+    val m = JSon2Properties.flattenJSon(parse("""[]"""))
     m should have size(0)
   }
 
   test("basic 10") {
-    val m = JSon2Properties.toProperties(parse("""[100,200,300]"""))
+    val m = JSon2Properties.flattenJSon(parse("""[100,200,300]"""))
     info(m.toString)
     m should have size(3)
     m should contain("0" -> 100)
   }
 
   test("basic 11") {
-    val m = JSon2Properties.toProperties(parse("""[{"a":200}]"""))
+    val m = JSon2Properties.flattenJSon(parse("""[{"a":200}]"""))
     info(m.toString)
     m should have size(1)
     m should contain("0.a" -> 200)
@@ -121,7 +119,7 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
     //val json = parse(bd.toString())
     //info(json.toString())
 
-    val m = JSon2Properties.toProperties(bd)
+    val m = JSon2Properties.flattenJSon(bd)
     m should have size (5)
     m should contain("test" -> 123)
     m should contain("sub.x" -> 1)
