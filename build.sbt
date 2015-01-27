@@ -16,6 +16,10 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.1.+" % "test"
 )
 
+organization :="fr.janalyse"
+
+organizationHomepage := Some(new URL("http://www.janalyse.fr"))
+
 initialCommands in console := """
 import fr.janalyse.json._
 import JSon2Properties._
