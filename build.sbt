@@ -1,15 +1,15 @@
 name := "json2props"
 
-version := "0.1"
+version := "0.2"
 
-scalaVersion := "2.11.4"
+scalaVersion := "2.11.6"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation" , "-feature")
 
-crossScalaVersions := Seq("2.10.4", "2.11.4")
+crossScalaVersions := Seq("2.10.5", "2.11.6")
 
 libraryDependencies ++= Seq(
-  "org.json4s"        %% "json4s-native" % "3.2.11"
+  "org.json4s"        %% "json4s-native" % "3.2.+"
 )
 
 libraryDependencies ++= Seq(
