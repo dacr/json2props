@@ -16,6 +16,7 @@
 
 package fr.janalyse.json
 
+
 import org.json4s.JsonDSL._
 import org.json4s._
 import scala.util.{ Try, Success }
@@ -29,7 +30,7 @@ object JSon2Properties {
   private def convert(bv: Any, key: String): Map[String, Any] = {
     bv match {
       case null                 => Map(key-> None) // TODO : bof
-      case v: Tuple2[String, _] => convert(v._2, v._1)
+      case JField(subk,v)       => convert(v, subk.toString)
       case v: JString           => Map(key -> v.values)
       case v: JDouble           => Map(key -> v.values)
       case v: JDecimal          => Map(key -> v.values)
@@ -50,7 +51,7 @@ object JSon2Properties {
   }
 
   def flattenJSon(bd: Any, base: String = ""): Map[String, Any] = convert(bd, base)
-
+  def json2props(in: Any):Map[String,Any]=flattenJSon(in)
 }
 
 
