@@ -16,21 +16,20 @@
 
 package fr.janalyse.json
 
-
 import org.json4s.JsonDSL._
 import org.json4s._
 import scala.util.{ Try, Success }
 import annotation.tailrec
 
 object JSon2Properties {
+  /*
   private def mkkey(key: String, subkey: Any): String =
     if (key.size > 0) key + "." + subkey else subkey.toString
-
   // TODO : must but @tailrec
-  private def convert(bv: Any, key: String): Map[String, Any] = {
+  private def convertWorker(bv: Any, key: String): Map[String, Any] = {
     bv match {
-      case null                 => Map(key-> None) // TODO : bof
-      case JField(subk,v)       => convert(v, subk.toString)
+      case null                 => Map(key-> None) // TODO : bof bof bof
+      case Tuple2(subk,v)       => convertWorker(v, subk.toString)  // JField == Tuple2[String,JValue]
       case v: JString           => Map(key -> v.values)
       case v: JDouble           => Map(key -> v.values)
       case v: JDecimal          => Map(key -> v.values)
@@ -38,20 +37,73 @@ object JSon2Properties {
       case v: JBool             => Map(key -> v.values)
       case JNull                => Map.empty
       case JNothing             => Map.empty
-      case v: JObject           => v.values.flatMap { case (subk, sv) => convert(sv, mkkey(key, subk)) }.toMap
-      case v: JArray            => v.values.zipWithIndex.flatMap { case (sv, i) => convert(sv, mkkey(key, i)) }.toMap
+      case v: JObject           => 
+        //println(v.getClass().getName+" - "+v+" ** "+v.children)
+        v.values.flatMap { case (subk, sv) => convertWorker(sv, mkkey(key, subk)) }.toMap
+        //v.values.zipWithIndex.flatMap { case (sv, i) => convertWorker(sv, mkkey(key, i)) }.toMap
+      case v: JArray            => 
+        //println(v.getClass().getName+" - "+v)
+        v.values.zipWithIndex.flatMap { case (sv, i) => convertWorker(sv, mkkey(key, i)) }.toMap
       case v: Iterable[_] =>
+        //println(v.getClass().getName+" - "+v)
         val r = v.zipWithIndex.flatMap {
-          case ((subk, sv), _) => convert(sv, mkkey(key, subk)) // map for example
-          case (sv, i)         => convert(sv, mkkey(key, i))
+          case ((subk, sv), _) => convertWorker(sv, mkkey(key, subk)) // map for example
+          case (sv, i)         => convertWorker(sv, mkkey(key, i))
         }
         r.toMap
-      case v    => Map(key -> v)
+      case v    =>
+        Map(key -> v)
+    }
+  }
+*/
+
+  val DEFKEY = "default"
+
+  // JField == Tuple2[String,JValue]
+  
+  private def convertWorker(value: Any, key: Option[String]): Map[String, Any] = {
+    def mkkey(subkey: Any): Option[String] = key match {
+      case None       => Some(subkey.toString)
+      case Some(base) => Some(base + "." + subkey)
+    }
+    val curkey = key.getOrElse(DEFKEY)
+    value match {
+      case null                     => Map.empty
+      case JNull                    => Map.empty
+      case JNothing                 => Map.empty
+      case JString(v)               => Map(curkey -> v)
+      case JDouble(v)               => Map(curkey -> v)
+      case JDecimal(v)              => Map(curkey -> v)
+      case JInt(v)                  => Map(curkey -> v)
+      case JBool(v)                 => Map(curkey -> v)
+      case JField(subkey, newvalue) => convertWorker(newvalue, mkkey(subkey))
+      case JObject(content) =>
+        content
+          .groupBy{case (subkey,value) => subkey}
+          .flatMap{
+            case (subkey, subvalue::Nil) => convert(subvalue, key) //mkkey(subkey))
+            case (subkey, subvalues) => 
+              println(subkey)
+              subvalues
+                .map{case (_,subvalue) => subvalue}
+                .zipWithIndex
+                .flatMap{case (subvalue,index) => convert(subvalue, mkkey(subkey+"."+index))}
+            }
+      case JArray(v) =>
+        val r = v.zipWithIndex.flatMap {
+          case (sv, i)         => convertWorker(sv, mkkey(i))
+        }
+        r.toMap
+      //case v => Map(curkey -> v)
     }
   }
 
-  def flattenJSon(bd: Any, base: String = ""): Map[String, Any] = convert(bd, base)
-  def json2props(in: Any):Map[String,Any]=flattenJSon(in)
+  private def convert(value: Any, key: Option[String]): Map[String, Any] = {
+    convertWorker(value, key)
+  }
+
+  def flattenJSon(bd: Any, base: Option[String] = None): Map[String, Any] = convert(bd, base)
+  def json2props(in: Any): Map[String, Any] = flattenJSon(in)
 }
 
 
