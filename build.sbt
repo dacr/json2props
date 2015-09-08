@@ -1,6 +1,6 @@
 name := "json2props"
 
-version := "0.3"
+version := "0.4-SNAPSHOT"
 
 scalaVersion := "2.11.7"
 
@@ -10,8 +10,8 @@ crossScalaVersions := Seq("2.10.5", "2.11.7")
 
 libraryDependencies ++= Seq(
   //"org.json4s"        %% "json4s-jackson" % "3.3.0.RC4"
-  //"org.json4s"        %% "json4s-jackson" % "3.2.+"
-  "org.json4s"        %% "json4s-jackson" % "3.3.0-SNAPSHOT"
+  "org.json4s"        %% "json4s-jackson" % "3.2.+"
+  //"org.json4s"        %% "json4s-jackson" % "3.3.0-SNAPSHOT"
 )
 
 libraryDependencies ++= Seq(
