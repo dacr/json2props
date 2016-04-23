@@ -68,9 +68,9 @@ object JSon2Properties {
     }
     val curkey = key.getOrElse(DEFKEY)
     value match {
-      case null                     => Map.empty
-      case JNull                    => Map.empty
-      case JNothing                 => Map.empty
+      case null                     => Map(curkey -> null)
+      case JNull                    => Map(curkey -> null)
+      case JNothing                 => Map(curkey -> None)
       case JString(v)               => Map(curkey -> v)
       case JDouble(v)               => Map(curkey -> v)
       case JDecimal(v)              => Map(curkey -> v)

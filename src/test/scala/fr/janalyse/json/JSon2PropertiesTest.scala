@@ -46,11 +46,12 @@ class JSon2PropertiesTest extends FunSuite with ShouldMatchers {
 
   
   test("basic 3") {
-    val json = parse("""{"a" : null }""")
-    info(json.toString)
+    val json = parse(""" {"a" : null } """)
+    info("JSON input : "+json.toString)
     val m = JSon2Properties.flattenJSon(json)
+    info("JSON converted : "+m)
     m should have size(1)
-    m should contain("a"-> None)
+    m should contain("a" -> null )
   }
 
   
