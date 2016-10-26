@@ -22,51 +22,12 @@ import scala.util.{ Try, Success }
 import annotation.tailrec
 
 object JSon2Properties {
-  /*
-  private def mkkey(key: String, subkey: Any): String =
-    if (key.size > 0) key + "." + subkey else subkey.toString
-  // TODO : must but @tailrec
-  private def convertWorker(bv: Any, key: String): Map[String, Any] = {
-    bv match {
-      case null                 => Map(key-> None) // TODO : bof bof bof
-      case Tuple2(subk,v)       => convertWorker(v, subk.toString)  // JField == Tuple2[String,JValue]
-      case v: JString           => Map(key -> v.values)
-      case v: JDouble           => Map(key -> v.values)
-      case v: JDecimal          => Map(key -> v.values)
-      case v: JInt              => Map(key -> v.values)
-      case v: JBool             => Map(key -> v.values)
-      case JNull                => Map.empty
-      case JNothing             => Map.empty
-      case v: JObject           => 
-        //println(v.getClass().getName+" - "+v+" ** "+v.children)
-        v.values.flatMap { case (subk, sv) => convertWorker(sv, mkkey(key, subk)) }.toMap
-        //v.values.zipWithIndex.flatMap { case (sv, i) => convertWorker(sv, mkkey(key, i)) }.toMap
-      case v: JArray            => 
-        //println(v.getClass().getName+" - "+v)
-        v.values.zipWithIndex.flatMap { case (sv, i) => convertWorker(sv, mkkey(key, i)) }.toMap
-      case v: Iterable[_] =>
-        //println(v.getClass().getName+" - "+v)
-        val r = v.zipWithIndex.flatMap {
-          case ((subk, sv), _) => convertWorker(sv, mkkey(key, subk)) // map for example
-          case (sv, i)         => convertWorker(sv, mkkey(key, i))
-        }
-        r.toMap
-      case v    =>
-        Map(key -> v)
-    }
-  }
-*/
+  val DEFKEY = "default"::Nil
 
-  val DEFKEY = "default"
-
-  // JField == Tuple2[String,JValue]
+  type JSonKey = List[String]
   
-  private def convertWorker(value: Any, key: Option[String]): Map[String, Any] = {
-    def mkkey(subkey: Any): Option[String] = key match {
-      case None       => Some(subkey.toString)
-      case Some(base) => Some(base + "." + subkey)
-    }
-    val curkey = key.getOrElse(DEFKEY)
+  private def convertWorker(value: Any, key: JSonKey): Map[JSonKey, Any] = {
+    val curkey=if (key.isEmpty) DEFKEY else key
     value match {
       case null                     => Map(curkey -> null)
       case JNull                    => Map(curkey -> null)
@@ -76,81 +37,35 @@ object JSon2Properties {
       case JDecimal(v)              => Map(curkey -> v)
       case JInt(v)                  => Map(curkey -> v)
       case JBool(v)                 => Map(curkey -> v)
-      case JField(subkey, newvalue) => convertWorker(newvalue, mkkey(subkey))
+      case JField(subkey, newvalue) => convertWorker(newvalue, subkey::key)
       case JObject(content) =>
         content
           .groupBy{case (subkey,value) => subkey}
           .flatMap{
-            case (subkey, subvalue::Nil) => convert(subvalue, key) //mkkey(subkey))
+            case (subkey, subvalue::Nil) => convertWorker(subvalue, key)
             case (subkey, subvalues) => 
-              println(subkey)
               subvalues
                 .map{case (_,subvalue) => subvalue}
                 .zipWithIndex
-                .flatMap{case (subvalue,index) => convert(subvalue, mkkey(subkey+"."+index))}
+                .flatMap{case (subvalue,index) => convertWorker(subvalue,(index.toString::subkey::key))}
             }
       case JArray(v) =>
         val r = v.zipWithIndex.flatMap {
-          case (sv, i)         => convertWorker(sv, mkkey(i))
+          case (sv, i)         => convertWorker(sv, i.toString::key)
         }
         r.toMap
-      //case v => Map(curkey -> v)
+      case v => Map(curkey -> v)
     }
   }
 
-  private def convert(value: Any, key: Option[String]): Map[String, Any] = {
-    convertWorker(value, key)
+  private def convert(value: Any, key: JSonKey): Map[JSonKey, Any] = {
+    convertWorker(value, key).map{case (k,v) => k.reverse->v}
   }
 
-  def flattenJSon(bd: Any, base: Option[String] = None): Map[String, Any] = convert(bd, base)
+  def flattenJSon(bd: Any, base: Option[String] = None): Map[String, Any] = {
+    val basekey = base.map(_.split("[.]").toList).getOrElse(Nil)
+    convert(bd, basekey).map{case (k,v) => k.mkString(".")->v}
+  }
   def json2props(in: Any): Map[String, Any] = flattenJSon(in)
+  def json2propsKey(in: Any): Map[JSonKey, Any] = convert(in, Nil)
 }
-
-
-
-
-
-/*
-import reactivemongo.bson._
-import scala.util.{ Try, Success }
-
-object JSon2Properties {
-  private def convert(key:String, bv: BSONValue): Map[String, String] = {
-    val result = bv match {
-      case v: BSONDocument     => toProperties(v, key)
-      case v: BSONArray        => v.values.zipWithIndex.flatMap { case (sv, i) => convert(key + "." + i, sv) }
-      case v: BSONBoolean      => Map(key -> v.value.toString)
-      case v: BSONDouble       => Map(key -> v.value.toString)
-      case v: BSONInteger      => Map(key -> v.value.toString)
-      case v: BSONLong         => Map(key -> v.value.toString)
-      case v: BSONString       => Map(key -> v.value)
-      case v: BSONDateTime     => Map(key -> v.value.toString)
-      case v: BSONTimestamp    => Map(key -> v.value.toString)
-      case v: BSONSymbol       => Map(key -> v.value.toString)
-      case v: BSONBinary       => Map() // TODO : NotYetImplemented, so ignored
-      case v: BSONDBPointer    => Map() // TODO : NotYetImplemented, so ignored
-      case v: BSONJavaScript   => Map() // TODO : NotYetImplemented, so ignored
-      case v: BSONJavaScriptWS => Map() // TODO : NotYetImplemented, so ignored
-      case v: BSONObjectID     => Map() // TODO : NotYetImplemented, so ignored
-      case v: BSONRegex        => Map() // TODO : NotYetImplemented, so ignored
-      case v => Map() // TODO : temporary to avoid any other unsupported types
-      //        case v:BSONMaxKey =>       key -> ???
-      //        case v:BSONMinKey =>       key -> ???
-      //        case v:BSONNull =>         key -> ???
-      //        case v:BSONUndefined =>    key -> ???
-    }
-    result.toMap
-  }
-  
-  def toProperties(bd: BSONDocument, base: String = ""): Map[String, String] = {
-    val result = bd.stream.collect { case Success(x) => x }.flatMap {
-      case (curkey, value) =>
-        val key = if (base.size==0) curkey else base+"."+curkey
-        convert(key, value)
-    }
-    result.toMap
-  }
-  
-}
-
-*/
