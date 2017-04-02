@@ -25,3 +25,46 @@ initialCommands in console := """
   |import Xml2Json._
   |""".stripMargin
 
+
+
+
+pomIncludeRepository := { _ => false }
+
+useGpg := true
+
+licenses += "Apache 2" -> url(s"http://www.apache.org/licenses/LICENSE-2.0.txt")
+releaseCrossBuild := true
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+publishMavenStyle := true
+publishArtifact in Test := false
+publishTo := Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)
+
+scmInfo := Some(ScmInfo(url(s"https://github.com/dacr/json2props"), s"git@github.com:dacr/json2props.git"))
+
+pomExtra in Global := {
+  <developers>
+    <developer>
+      <id>dacr</id>
+      <name>David Crosson</name>
+      <url>https://github.com/dacr</url>
+    </developer>
+  </developers>
+}
+
+
+import ReleaseTransformations._
+releaseProcess := Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    inquireVersions,
+    //runClean,
+    runTest,
+    setReleaseVersion,
+    commitReleaseVersion,
+    tagRelease,
+    publishArtifacts,
+    setNextVersion,
+    commitNextVersion,
+    releaseStepCommand("sonatypeReleaseAll"),
+    pushChanges
+  )
+ 
