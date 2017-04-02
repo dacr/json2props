@@ -27,8 +27,8 @@ Latest `version`: [![Maven][mavenImg]][mavenLink] [![Scaladex][scaladexImg]][sca
 [licenseImg2]: https://img.shields.io/:license-apache2-blue.svg
 [licenseLink]: LICENSE
 
-[codacyImg]: https://img.shields.io/codacy/a23d442ea78f40b08e016e2f2fff5709.svg
-[codacyImg2]: https://api.codacy.com/project/badge/grade/a23d442ea78f40b08e016e2f2fff5709
+[codacyImg]: https://img.shields.io/codacy/e01ab68b61424eb69211acf2699d0756.svg
+[codacyImg2]: https://api.codacy.com/project/badge/grade/e01ab68b61424eb69211acf2699d0756
 [codacyLink]: https://www.codacy.com/app/dacr/json2props/dashboard
 
 [codecovImg]: https://img.shields.io/codecov/c/github/dacr/json2props/master.svg
