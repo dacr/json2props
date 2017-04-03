@@ -1,6 +1,5 @@
 package fr.janalyse.json
 
-//import org.json4s.{Xml=>JXML}
 import fr.janalyse.json.{Xml=>JXML}
 import org.json4s.JValue
 import org.json4s.jackson.JsonMethods.{pretty,render}

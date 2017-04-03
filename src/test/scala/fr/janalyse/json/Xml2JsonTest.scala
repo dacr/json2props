@@ -22,10 +22,11 @@ import org.scalatest.Matchers._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.JsonDSL._
+import Xml2Json._
+import JSon2Properties._
 
+  
 class Xml2JsonTest extends FunSuite {
-  import Xml2Json._
-  import JSon2Properties._
 
   def jinfo(in: Map[String, Any]): Unit = {
     for { (k, v) <- in.toList.sortBy { case (k, v) => k } } info(s"$k=$v")

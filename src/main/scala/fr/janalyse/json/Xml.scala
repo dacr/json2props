@@ -16,11 +16,11 @@
 
 package fr.janalyse.json
 import org.json4s._
+import scala.xml._
 
 /** Functions to convert between JSON and XML.
  */
 object Xml {
-  import scala.xml._
 
   /** Convert given XML to JSON.
    * <p>
@@ -126,13 +126,11 @@ object Xml {
         case (_, json) => JField(name, json) :: Nil }}
 
     def buildNodes(xml: NodeSeq): List[XElem] = xml match {
+      case n: Node if isEmpty(n) => XLeaf((nameOf(n), XValue("")), buildAttrs(n)) :: Nil
+      case n: Node if isLeaf(n) => XLeaf((nameOf(n), XValue(n.text)), buildAttrs(n)) :: Nil
       case n: Node =>
-        if (isEmpty(n)) XLeaf((nameOf(n), XValue("")), buildAttrs(n)) :: Nil
-        else if (isLeaf(n)) XLeaf((nameOf(n), XValue(n.text)), buildAttrs(n)) :: Nil
-        else {
           val children = directChildren(n)
           XNode(buildAttrs(n) ::: children.map(nameOf).toList.zip(buildNodes(children))) :: Nil
-        }
       case nodes: NodeSeq =>
         val allLabels = nodes.map(_.label)
         if (isArray(allLabels)) {
@@ -171,9 +169,9 @@ object Xml {
    * </pre>
    */
   def toXml(json: JValue): NodeSeq = {
-    def toXml(name: String, json: JValue): NodeSeq = json match {
-      case JObject(fields) => new XmlNode(name, fields flatMap { case (n, v) => toXml(n, v) })
-      case JArray(xs) => xs flatMap { v => toXml(name, v) }
+    def toXmlWorker(name: String, json: JValue): NodeSeq = json match {
+      case JObject(fields) => new XmlNode(name, fields flatMap { case (n, v) => toXmlWorker(n, v) })
+      case JArray(xs) => xs flatMap { v => toXmlWorker(name, v) }
 //      case JLong(x) => new XmlElem(name, x.toString)
       case JInt(x) => new XmlElem(name, x.toString)
       case JDouble(x) => new XmlElem(name, x.toString)
@@ -182,11 +180,12 @@ object Xml {
       case JBool(x) => new XmlElem(name, x.toString)
       case JNull => new XmlElem(name, "null")
       case JNothing => Text("")
+      case x => Text(x.toString) // TODO : unmanaged
     }
 
     json match {
-      case JObject(fields) => fields flatMap { case (n, v) => toXml(n, v) }
-      case x => toXml("root", x)
+      case JObject(fields) => fields flatMap { case (n, v) => toXmlWorker(n, v) }
+      case x => toXmlWorker("root", x)
     }
   }
 
