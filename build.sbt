@@ -1,29 +1,33 @@
 name := "json2props"
-
 organization :="fr.janalyse"
 homepage := Some(new URL("https://github.com/dacr/json2props"))
+licenses += "Apache 2" -> url(s"http://www.apache.org/licenses/LICENSE-2.0.txt")
+scmInfo := Some(ScmInfo(url(s"https://github.com/dacr/json2props"), s"git@github.com:dacr/json2props.git"))
 
-scalaVersion := "2.12.8"
-scalacOptions ++= Seq("-unchecked", "-deprecation" , "-feature")
-crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.13.0")
+scalaVersion := "2.13.1"
+scalacOptions ++= Seq( "-deprecation", "-unchecked", "-feature")
+
+crossScalaVersions := Seq("2.11.12", "2.12.11", "2.13.1")
+// 2.11.12 : generates java 6 bytecodes
+// 2.12.11 : generates java 8 bytecodes && JVM8 required for compilation
+// 2.13.1  : generates java 8 bytecodes && JVM8 required for compilation
 
 libraryDependencies ++= Seq(
-  "org.json4s"        %% "json4s-jackson" % "3.6.7"
+  "org.scala-lang.modules" %% "scala-xml" % "1.3.0",
+  "org.json4s"    %% "json4s-jackson" % "3.6.7",
+  "org.scalatest" %% "scalatest" % "3.1.1" % Test
 )
 
-libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test"
-)
 
-
-libraryDependencies ++= {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, major)) if major > 10 =>
-      Seq("org.scala-lang.modules" %% "scala-xml" % "1.2.0")
-    case _ =>
-      Seq()
-  }
+testOptions in Test += {
+  val rel = scalaVersion.value.split("[.]").take(2).mkString(".")
+  Tests.Argument(
+    "-oDF", // -oW to remove colors
+    "-u", s"target/junitresults/scala-$rel/"
+  )
 }
+
+
 
 initialCommands in console := """
   |import org.json4s._
@@ -33,50 +37,3 @@ initialCommands in console := """
   |import JSon2Properties._
   |import Xml2Json._
   |""".stripMargin
-
-
-
-
-pomIncludeRepository := { _ => false }
-
-useGpg := true
-
-licenses += "Apache 2" -> url(s"http://www.apache.org/licenses/LICENSE-2.0.txt")
-releaseCrossBuild := true
-releasePublishArtifactsAction := PgpKeys.publishSigned.value
-publishMavenStyle := true
-publishArtifact in Test := false
-publishTo := Some(if (isSnapshot.value) Opts.resolver.sonatypeSnapshots else Opts.resolver.sonatypeStaging)
-
-scmInfo := Some(ScmInfo(url(s"https://github.com/dacr/json2props"), s"git@github.com:dacr/json2props.git"))
-
-PgpKeys.useGpg in Global := true      // workaround with pgp and sbt 1.2.x
-pgpSecretRing := pgpPublicRing.value  // workaround with pgp and sbt 1.2.x
-
-pomExtra in Global := {
-  <developers>
-    <developer>
-      <id>dacr</id>
-      <name>David Crosson</name>
-      <url>https://github.com/dacr</url>
-    </developer>
-  </developers>
-}
-
-
-import ReleaseTransformations._
-releaseProcess := Seq[ReleaseStep](
-    checkSnapshotDependencies,
-    inquireVersions,
-    //runClean,
-    runTest,
-    setReleaseVersion,
-    commitReleaseVersion,
-    tagRelease,
-    publishArtifacts,
-    setNextVersion,
-    commitNextVersion,
-    releaseStepCommand("sonatypeReleaseAll"),
-    pushChanges
-  )
- 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 David Crosson
+ * Copyright 2017-2020 David Crosson
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package fr.janalyse.json
 
-import org.scalatest.FunSuite
-import org.scalatest.Matchers._
+import org.scalatest.funsuite._
+import org.scalatest.matchers._
 
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.JsonDSL._
 
 
-class JSon2PropertiesTest extends FunSuite {
+class JSon2PropertiesTest extends AnyFunSuite with should.Matchers {
 
 
   ignore("basic 0") {

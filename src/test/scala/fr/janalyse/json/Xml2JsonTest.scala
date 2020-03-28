@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 David Crosson
+ * Copyright 2017-2020 David Crosson
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package fr.janalyse.json
 
-import org.scalatest.FunSuite
-import org.scalatest.Matchers._
+import org.scalatest.funsuite._
+import org.scalatest.matchers._
 
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
@@ -26,7 +26,7 @@ import Xml2Json._
 import JSon2Properties._
 
   
-class Xml2JsonTest extends FunSuite {
+class Xml2JsonTest extends AnyFunSuite with should.Matchers {
 
   def jinfo(in: Map[String, Any]): Unit = {
     for { (k, v) <- in.toList.sortBy { case (k, v) => k } } info(s"$k=$v")
