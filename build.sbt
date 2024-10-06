@@ -1,22 +1,18 @@
 name         := "json2props"
 organization := "fr.janalyse"
-homepage     := Some(new URL("https://github.com/dacr/json2props"))
-scmInfo      := Some(ScmInfo(url(s"https://github.com/dacr/json2props"), s"git@github.com:dacr/json2props.git"))
+description  := "Hack to translate some JSON data to properties like data (key-value)"
 
 licenses += "NON-AI-APACHE2" -> url(s"https://github.com/non-ai-licenses/non-ai-licenses/blob/main/NON-AI-APACHE2")
 
-scalaVersion := "3.3.0"
+scalaVersion       := "3.3.0"
+crossScalaVersions := Seq("2.13.15", "3.5.1")
+
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
-crossScalaVersions := Seq("2.12.13", "2.13.11", "3.3.0")
-// 2.11.x : generates java 6 bytecodes
-// 2.12.x : generates java 8 bytecodes && JVM8 required for compilation
-// 2.13.x : generates java 8 bytecodes && JVM8 required for compilation
-
 libraryDependencies ++= Seq(
-  "org.scala-lang.modules" %% "scala-xml"      % "2.1.0",
-  "org.json4s"             %% "json4s-jackson" % "4.0.6",
-  "org.scalatest"          %% "scalatest"      % "3.2.16" % Test
+  "org.scala-lang.modules" %% "scala-xml"      % "2.3.0",
+  "org.json4s"             %% "json4s-jackson" % "4.0.7",
+  "org.scalatest"          %% "scalatest"      % "3.2.19" % Test
 )
 
 Test / testOptions += {
@@ -36,3 +32,14 @@ console / initialCommands := """
                                |import JSon2Properties._
                                |import Xml2Json._
                                |""".stripMargin
+
+homepage   := Some(url("https://github.com/dacr/json2props"))
+scmInfo    := Some(ScmInfo(url(s"https://github.com/dacr/json2props"), s"git@github.com:dacr/json2props.git"))
+developers := List(
+  Developer(
+    id = "dacr",
+    name = "David Crosson",
+    email = "crosson.david@gmail.com",
+    url = url("https://github.com/dacr")
+  )
+)
